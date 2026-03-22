@@ -218,6 +218,7 @@ public class MotorPH {
         LocalTime workStart  = LocalTime.of(8, 0);
         LocalTime graceEnd   = LocalTime.of(8, 10);
         LocalTime workEnd    = LocalTime.of(17, 0);
+        double maxHoursPerDay = 8.0;
         int lunchMinutes     = 60;
 
         try {
@@ -243,13 +244,24 @@ public class MotorPH {
                 LocalTime timeIn  = LocalTime.parse(p[4].trim(), f);
                 LocalTime timeOut = LocalTime.parse(p[5].trim(), f);
 
-                LocalTime effectiveIn  = (!timeIn.isAfter(graceEnd)) ? workStart : timeIn;
+                // Grace period: if clocked in at 8:10 or earlier, treat as 8:00
+                // If clocked in after 8:10, start counting from actual time in (late)
+                LocalTime effectiveIn = timeIn.isAfter(graceEnd) ? timeIn : workStart;
+
+                // Cap time out at 5:00 PM — no overtime counted
                 LocalTime effectiveOut = timeOut.isAfter(workEnd) ? workEnd : timeOut;
 
+                // Skip if employee clocked out before or at their start time
+                if (!effectiveOut.isAfter(effectiveIn)) continue;
+
+                // Calculate minutes worked, subtract 1-hour lunch break
                 long minutesWorked = Duration.between(effectiveIn, effectiveOut).toMinutes() - lunchMinutes;
                 if (minutesWorked < 0) minutesWorked = 0;
 
-                total += (minutesWorked / 60.0);
+                // Convert to hours and enforce 8-hour daily max
+                double hoursWorked = Math.min(minutesWorked / 60.0, maxHoursPerDay);
+
+                total += hoursWorked;
             }
 
             br.close();
@@ -291,11 +303,11 @@ public class MotorPH {
             return;
         }
 
-        System.out.println("\n=======================");
-        System.out.println("Employee Number : " + id);
-        System.out.println("Employee Name   : " + e[1] + " " + e[0]);
-        System.out.println("Birthday        : " + e[2]);
-        System.out.printf("Basic Salary    : %.2f\n", basicSalary);
+            System.out.println("\n=======================");
+            System.out.println("Employee Number : " + id);
+            System.out.println("Employee Name   : " + e[1] + " " + e[0]);
+            System.out.println("Birthday        : " + e[2]);
+            System.out.println("Basic Salary    : " + basicSalary);
 
         for (int month : availableMonths) {
 
@@ -327,25 +339,26 @@ public class MotorPH {
 
             // ---- CUTOFF 1 ----
             System.out.println("\nCutoff Date        : " + MONTH_NAMES[month] + " 1 to 15");
-            System.out.printf("Total Hours Worked : %.2f hrs\n", h1);
-            System.out.printf("Gross Salary       : %.2f\n", g1);
-            System.out.printf("Net Salary         : %.2f\n", net1);
+            System.out.println("Total Hours Worked : " + h1 + " hrs");
+            System.out.println("Gross Salary       : " + g1);
+            System.out.println("Net Salary         : " + net1);
 
             // ---- CUTOFF 2 ----
             System.out.println("\nCutoff Date        : " + MONTH_NAMES[month] + " 16 to 30");
-            System.out.printf("Total Hours Worked : %.2f hrs\n", h2);
-            System.out.printf("Gross Salary       : %.2f\n", g2);
-            System.out.printf("Total Deductions   : %.2f\n", totalDeductions);
-            System.out.printf("Net Salary         : %.2f\n", net2);
+            System.out.println("Total Hours Worked : " + h2 + " hrs");
+            System.out.println("Gross Salary       : " + g2);
+            System.out.println("Total Deductions   : " + totalDeductions);
+            System.out.println("Net Salary         : " + net2);
             
-            System.out.println("\n-- Deductions (based on Total Monthly Gross --");         
-            System.out.printf("Total Monthly Gross: %.2f\n", monthlyGross);
-            System.out.printf("SSS                : %.2f\n", sss);
-            System.out.printf("PhilHealth         : %.2f\n", philhealth);
-            System.out.printf("Pag-IBIG           : %.2f\n", pagibig);            
-            System.out.printf("Taxable Income     : %.2f\n", taxableIncome);
-            System.out.printf("Tax (Withholding)  : %.2f\n", tax);            
-            System.out.printf("Total Deductions   : %.2f\n", totalDeductions);
+            System.out.println("\n-- Deductions (based on Total Monthly Gross) --");
+            System.out.println("Total Monthly Gross: " + monthlyGross);
+            System.out.println("SSS                : " + sss);
+            System.out.println("PhilHealth         : " + philhealth);
+            System.out.println("Pag-IBIG           : " + pagibig);
+            System.out.println("Taxable Income     : " + taxableIncome);
+            System.out.println("Tax (Withholding)  : " + tax);
+            System.out.println("Total Deductions   : " + totalDeductions);
+
             
             
         }
