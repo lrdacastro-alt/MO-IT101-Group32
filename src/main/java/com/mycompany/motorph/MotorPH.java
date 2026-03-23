@@ -35,12 +35,12 @@ public class MotorPH {
 
     static String login() {
         System.out.print("Username: ");
-        String u = sc.nextLine().trim();
+        String loginID = sc.nextLine().trim();
 
         System.out.print("Password: ");
-        String p = sc.nextLine().trim();
+        String password = sc.nextLine().trim();
 
-        if ((u.equals("employee") || u.equals("payroll_staff")) && p.equals("12345")) return u;
+        if ((loginID.equals("employee") || loginID.equals("payroll_staff")) && password.equals("12345")) return loginID;
 
         System.out.println("Invalid login.");
         System.exit(0);
@@ -63,12 +63,12 @@ public class MotorPH {
                     String id = sc.nextLine().trim();
 
                     if (employees.containsKey(id)) {
-                        String[] e = employees.get(id);
-                        System.out.println("Name              : " + e[1] + " " + e[0]);
-                        System.out.println("Birthday          : " + e[2]);
-                        System.out.println("Basic Salary      : " + e[5]);
-                        System.out.println("Gross Semi-monthly: " + e[3]);
-                        System.out.println("Hourly Rate       : " + e[4]);
+                        String[] employee = employees.get(id);
+                        System.out.println("Name              : " + employee[1] + " " + employee[0]);
+                        System.out.println("Birthday          : " + employee[2]);
+                        System.out.println("Basic Salary      : " + employee[5]);
+                        System.out.println("Gross Semi-monthly: " + employee[3]);
+                        System.out.println("Hourly Rate       : " + employee[4]);
                     } else {
                         System.out.println("Employee number does not exist.");
                     }
